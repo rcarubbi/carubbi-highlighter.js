@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            background-color: #ccc;
+        }
+
+        .displayElement {
+            margin: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <label id="label1" class="displayElement">Label 1</label>
+        <p id="label2" class="displayElement">Label 2</p>
+        <div id="label3" class="displayElement">Label 3</div>
+        <table>
+            <tr>
+                <td id="cell1" class="displayElement">
+                    1
+                </td>
+                <td id="cell2" class="displayElement">
+                    2
+                </td>
+                <td id="cell3" class="displayElement">
+                    3
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div>
+        <input type="text" id="textBox" />
+        <button id="buttonLabel1">Label1</button>
+        <button id="buttonLabel2">Label2</button>
+        <button id="buttonLabel3">Label3</button>
+        <button id="buttonCell1">Cell1</button>
+        <button id="buttonCell2">Cell2</button>
+        <button id="buttonCell3">Cell3</button>
+    </div>
+    <script type="module" src="highlighter.js"></script>
+    <script type="module">
+        import { highlight } from './highlighter.js';
+
+        document.getElementById("buttonLabel1").addEventListener("click", () => { onClick('label1') })
+        document.getElementById("buttonLabel2").addEventListener("click", () => { onClick('label2') })
+        document.getElementById("buttonLabel3").addEventListener("click", () => { onClick('label3') })
+        document.getElementById("buttonCell1").addEventListener("click", () => { onClick('cell1') })
+        document.getElementById("buttonCell2").addEventListener("click", () => { onClick('cell2') })
+        document.getElementById("buttonCell3").addEventListener("click", () => { onClick('cell3') })
+
+
+        async function onClick(target) {
+            const newValue = document.getElementById("textBox").value;
+            const element = document.getElementById(target);
+            element.innerHTML = newValue;
+
+            await highlight(target, [
+                { duration: .5, highLightColor: 'yellow', bgColor: 'yellow' },
+                { duration: .5, highLightColor: 'orange', bgColor: 'orange' },
+                { duration: .5, highLightColor: 'green', bgColor: 'green' },
+                { duration: .5, highLightColor: 'blue', bgColor: 'blue' },
+                { duration: 1, highLightColor: 'red', bgColor: 'white' },
+            ]);
+        }
+
+
+
+    </script>
+</body>
+
+</html>
