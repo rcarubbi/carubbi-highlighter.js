@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism-okaidia.min.css">
+
+
+</head>
+
+<body>
+    <div class="landing-page">
+        <div class="header">
+            <h1>Carubbi's Highlighter.js</h1>
+            <h2>Supercharge Your Web Animations</h2>
+        </div>
+        <div class="content">
+
+            <p>Highlighter.js is a powerful tool for creating stunning animated effects on your web elements. With
+                its
+                simple and intuitive API, create smooth transitions and eye-catching visual effects effortlessly.
+            </p>
+
+            <section class="syntax-demo">
+                <h3>Demo: Syntax Highlighting</h3>
+                <pre>
+                    <code class="language-javascript">
+await highlight(
+    target,
+    [
+        {duration:2, backgroundColor:'red'},
+        {duration:1, backgroundColor:'orange', inTime:1},
+        {duration:.5, backgroundColor:'green', inTime:99}
+    ]);
+                    </code>
+                </pre>
+            </section>
+        </div>
+
+
+
+        <div class="container">
+
+            <div class="button-label-pair">
+                <button id="buttonLabel1">Chained Animations</button>
+                <label id="label1" class="displayElement">Chained Animations</label>
+            </div>
+            <div class="button-label-pair">
+                <button id="buttonLabel2">Red linear</button>
+                <label id="label2" class="displayElement">Red linear</label>
+            </div>
+            <div class="button-label-pair">
+                <button id="buttonLabel3">Green ease in</button>
+                <label id="label3" class="displayElement">Green ease in</label>
+            </div>
+            <div class="button-label-pair">
+                <button id="buttonCell1">Orange ease out</button>
+                <label id="cell1" class="displayElement">Orange ease out</label>
+            </div>
+            <div class="button-label-pair">
+                <button id="buttonCell2">Blue blink twice</button>
+                <label id="cell2" class="displayElement">Blue blink twice</label>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="highlighter.js"></script>
+    <script type="module" src="script.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/components/prism-javascript.min.js"></script>
+</body>
+
+</html>

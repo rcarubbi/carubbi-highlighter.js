@@ -1,43 +1,42 @@
-
-let mainStyle = document.querySelector('style');
-if (!mainStyle) {
-    mainStyle = document.createElement("style");
-    document.head.appendChild(mainStyle);
-}
-
-const cssElements = {};
+import {ensureAnimations, ensureKeyFrames, getAnimationKey } from './cssGenerator.js';
+ 
 const timeoutRefs = {};
+
 const defaultConfig = {
     duration: 3,
-    highLightColor: 'yellow',
-    bgColor: 'white',
-    cancellationToken: null
-}
+    backgroundColor: 'yellow',
+    cancellationToken: null,
+    color: 'black',
+    inTime: 50,
+    outTime: 100
+};
 
-let context = {};
-export async function highlight(elementId, configs) {
-    context[elementId] ||= {};
+let executionContext = {};
 
-    if (context[elementId].ac) {
-        context[elementId].ac.abort();
+export async function highlight(elementId, transitions) {
+
+    executionContext[elementId] ||= {};
+
+    if (executionContext[elementId].cancellationToken) {
+        executionContext[elementId].cancellationToken.abort();
+
     }
 
-    context[elementId].ac = new AbortController();
+    executionContext[elementId].cancellationToken = new AbortController();
 
-    for (const config of configs) {
-        try {
-            await run(elementId, { ...config, cancellationToken: context[elementId].ac.signal })
-        } catch (e) {
-            break;
+    try {
+        for (const transition of transitions) {
+            await run(elementId, {
+                ...transition,
+                cancellationToken: executionContext[elementId].cancellationToken
+            });
+
         }
-    }
+    } catch (e) { console.error(e) }
 }
 
-
-function run(elementId, config) {
-    const currentConfig = { ...defaultConfig, ...config };
-
-    if (currentConfig.cancellationToken && currentConfig.cancellationToken.aborted)
+async function run(elementId, transition) {
+    if (transition.cancellationToken.signal.aborted)
         return;
 
     const element = document.getElementById(elementId);
@@ -46,62 +45,46 @@ function run(elementId, config) {
         console.error("Element with the provided ID does not exist");
         return;
     }
+    const computedStyles = window.getComputedStyle(element);
 
-    const key = `${elementId}-${currentConfig.bgColor}-${currentConfig.highLightColor}-${currentConfig.duration.toString().replace(/\./g, '0')}`;
+    const currentConfig = {
+        ...defaultConfig,
+        originalBackgroundColor: computedStyles.backgroundColor,
+        originalColor: computedStyles.color,
+        ...transition
+    };
 
-    let elementStyle = cssElements[key];
+    await ensureKeyFrames(currentConfig);
+    await ensureAnimations(currentConfig);
 
-    if (!elementStyle) {
-
-        const elementCss = `
-        @keyframes highlight-${key} {
-            0% {
-                background-color: ${currentConfig.highLightColor};
-            }
-    
-            100% {
-                background-color: ${currentConfig.bgColor};
-            }
-        }
-    
-        .refresh-${key} {
-            animation: highlight-${key} ${currentConfig.duration}s;
-        }
-
-        #${elementId} {
-            background-color: ${currentConfig.bgColor};
-            transition: background-color 1s ease;
-        }`
-        mainStyle.innerHTML += elementCss;
-        cssElements[key] = true;
-    }
-
-
+    const animationKey = await getAnimationKey(currentConfig);
 
     return new Promise((resolve, reject) => {
 
-        if (currentConfig.cancellationToken) {
-            currentConfig.cancellationToken.addEventListener('abort', () => {
-                if (timeoutRefs[key]) {
-                    clearTimeout(timeoutRefs[key]);
-                }
-                element.classList.remove(`refresh-${key}`);
-                reject();
-            })
-        }
+        const handleAbort = () => {
+            if (timeoutRefs[elementId]) {
+                clearTimeout(timeoutRefs[elementId]);
+            }
+            requestAnimationFrame(() => {
+                element.classList.remove(`refresh-${animationKey}`);
+            });
+            reject();
+        };
 
-        element.classList.remove(`refresh-${key}`);
-        // Adiciona a classe em um próximo ciclo de renderização
-        setTimeout(() => {
-            element.classList.add(`refresh-${key}`);
+        const handleAnimationEnd = () => {
+            element.classList.remove(`refresh-${animationKey}`);
+            resolve();
+        };
+
+        currentConfig.cancellationToken.signal.addEventListener('abort', handleAbort)
+
+        element.classList.remove(`refresh-${animationKey}`);
+
+        requestAnimationFrame(() => {
+            element.classList.add(`refresh-${animationKey}`);
         });
 
-        // Remove a classe após 3 segundos
-        timeoutRefs[key] = setTimeout(() => {
-            element.classList.remove(`refresh-${key}`);
-            resolve();
-        }, currentConfig.duration * 1000);
-
-
+        timeoutRefs[elementId] = setTimeout(handleAnimationEnd, (currentConfig.duration * 1000));
     });
 }
+
